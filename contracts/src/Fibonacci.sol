@@ -14,7 +14,7 @@ struct PublicValuesStruct {
 /// @notice This contract implements a simple example of verifying the proof of a computing a
 ///         fibonacci number.
 contract Fibonacci {
-    /// @notice The address of the zkMIPS verifier contract.
+    /// @notice The address of the Ziren verifier contract.
     /// @dev This is a specific ZKMVerifier for a specific version.
     IZKMVerifier public verifier;
 
