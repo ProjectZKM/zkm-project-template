@@ -1,11 +1,17 @@
 # ZKM Project Template
 
-The Project Template allows the developer to create an end-to-end zkMIPS project and the on-chain Solidity verifier.
+The Project Template creates an end-to-end [Ziren](https://github.com/ProjectZKM/Ziren) project:
+a guest program proved by the Ziren zkVM, a host that executes it and generates proofs, and the
+on-chain Solidity verifier for the proofs.
 
-Two provers have been provided:
+It targets Ziren V2.0: the Ziren crates are pinned to the V2.0 release commit in
+`host/Cargo.toml` and `guest/Cargo.toml`, and the verifier contracts are the `v2.0.0` ones in
+`contracts/src/v2.0.0`.
 
-- Local Prover: Use your machine to run the prover and generate the proof by your end.
-- Network Prover: Use ZKM proof network to generate the proof via our Restful API. 
+Two provers are available:
+
+- Local prover: generate proofs on your own machine.
+- Network prover: generate proofs on the ZKM proof network.
 
 ## Running diagram
 
@@ -13,132 +19,126 @@ Two provers have been provided:
 
 ## Getting Started
 
-First to install zkm toolchain run the following command and follow the instructions:
+Install the Ziren toolchain (release `20260917` or later) and follow the instructions:
+
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/zkMIPS/toolchain/refs/heads/main/setup.sh | sh
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/ProjectZKM/toolchain/refs/heads/main/setup.sh | sh
 source ~/.zkm-toolchain/env
 ```
 
-## Local Proving Requirements
+After `source ~/.zkm-toolchain/env` the host builds with the Ziren toolchain's `cargo`; without it,
+`rustup` builds the host with the nightly pinned in `rust-toolchain.toml`, the one Ziren itself is
+built with. The guest is always built with the Ziren toolchain.
 
-- Hardware: X86_64 CPU, 32 cores, 13GB memory (minimum)
-- OS: Linux
-- Rust: 1.81.0-nightly
-- Go : 1.22.1
-- Set up a local node for some blockchain(eg, sepolia)
+## Requirements
 
-## Network Proving Requirements
-
-- Hardware: X86_64 CPU, 8 cores, 8G memory
-- OS: Linux
-- Rust: 1.81.0-nightly
-- Go : 1.22.1
-- CA certificate: ca.pem, ca.key
-- [Register](https://www.zkm.io/apply) your address to use
-- RPC for a blockchain (eg, sepolia)
+- Local proving: x86_64 Linux. Core and compressed proofs of this example need a few GB of memory;
+  Groth16 and PLONK proofs need about 80 GB, and Go 1.22 or later for the gnark prover.
+- Network proving: x86_64 Linux, a registered address ([apply here](https://www.zkm.io/apply)) and
+  the network's client certificates.
 
 > [!NOTE]
-> All actions are assumed to be from the base directory `zkm-project-template`
+> All commands below run from the repository root unless they `cd` first.
 
 ## Running the project
 
-There are four main ways to run this project: 
-- **Execute** a program.
-- Generate a **core** proof. 
+There are four ways to run this project:
+- **Execute** the program.
+- Generate a **core** proof.
 - Generate a **compressed** proof.
-- Generate an **EVM-compatible** proof.
+- Generate an **EVM-compatible** (Groth16 or PLONK) proof.
 
-### Build the Program
-
-The program is automatically built through `./host/build.rs` whenever the host is built.
+The guest program is built automatically by `host/build.rs` whenever the host is built.
 
 ### Execute the Program
 
-To run the guest program without generating a proof:
 ```sh
 cd host
 cargo run --release -- --execute
 ```
 
-This will execute the guest program and display the output.
+This executes the guest program without proving it, checks its output and prints the cycle count.
 
-### Generate an zkMIPS Core Proof
-
-To generate a zkMIPS [core proof](https://docs.zkm.io/dev/prover.html#proof-types) for your guest program:
+### Generate a Core Proof
 
 ```sh
 cd host
 cargo run --release -- --core
 ```
-### Generate an zkMIPS Compressed Proof
 
-To generate a zkMIPS [compressed proof](https://docs.zkm.io/dev/prover.html#proof-types) for your guest program:
+### Generate a Compressed Proof
 
 ```sh
 cd host
 cargo run --release -- --compressed
 ```
 
-### Generate an EVM-Compatible Proof
-Producing a proof that’s cheap to verify on Ethereum (e.g., Groth16 or PLONK) is more computationally intensive than generating a core or compressed proof.
+See [proof types](https://docs.zkm.io/dev/prover.html) for the difference between core and
+compressed proofs.
 
-- To generate a Groth16 proof:
+### Generate an EVM-Compatible Proof
+
+Groth16 and PLONK proofs are cheap to verify on Ethereum but take longer to generate than core or
+compressed proofs. The first run downloads the `v2.0.0` circuit artifacts to `~/.zkm/circuits`.
+
 ```sh
 cd host
 cargo run --release --bin evm -- --system groth16
-```
-
-- To generate a PLONK proof:
-```sh
 cargo run --release --bin evm -- --system plonk
 ```
-These commands will also generate fixtures that can be used to test verification of zkMIPS proofs in Solidity.
 
->[!NOTE]
-> Do not set `ZKM_PROVER=network` when generating a core, compressed or PLONK proof — the network prover only supports Groth16.
-
+Each command verifies the proof and writes a fixture to `contracts/src/fixtures/` that the Solidity
+tests verify.
 
 ### Retrieve the Verification Key
 
-To retrieve your `programVKey` for your on-chain contract, run the following command in `host`:
+The `programVKey` your on-chain contract checks proofs against:
 
 ```sh
+cd host
 cargo run --release --bin vkey
 ```
 
 ## Using the Prover Network
 
-Refer to this [document](https://docs.zkm.io/dev/prover.html#network-prover).
-The proving workflow involves several stages—queuing, splitting, proving, aggregating, and finalizing—
-each of which can take varying amounts of time. Before running the prover, ensure that you have set up the following environment variables in your `.env`:
+Set the prover in `.env` (see `.env.example`):
 
 ```env
 ZKM_PROVER=network
 ZKM_PRIVATE_KEY=
 SSL_CERT_PATH=
 SSL_KEY_PATH=
+CA_CERT_PATH=
 ```
 
-### Deploy the Verifier Contract
+The network prover generates compressed and Groth16 proofs. See the
+[network prover](https://docs.zkm.io/dev/prover.html) documentation for the endpoint and certificate
+settings.
 
-If your system does not have Foundry, please install it:
+## Solidity Verifier
+
+Install [Foundry](https://getfoundry.sh/) if you do not have it:
 
 ```sh
 curl -L https://foundry.paradigm.xyz | bash
 ```
-#### Verify the EVM-Compatible Proof
 
-```
-cd  zkm-project-template/contracts
+### Verify the EVM-Compatible Proofs
+
+```sh
+cd contracts
 forge test
 ```
 
-#### Deploy the contract
+The tests verify the Groth16 and PLONK fixtures against the `v2.0.0` verifiers, and check that a
+changed proof or changed public values are rejected.
 
-Please edit the following parameters according your aim blockchain.
+### Deploy the Verifier Contract
 
+```sh
+cd contracts
+forge script script/ZKMVerifierGroth16.s.sol:ZKMVerifierGroth16Script --rpc-url <RPC_URL> --private-key <PRIVATE_KEY> --broadcast
 ```
-forge script script/verifier.s.sol:VerifierScript --rpc-url https://eth-sepolia.g.alchemy.com/v2/RH793ZL_pQkZb7KttcWcTlOjPrN0BjOW --private-key df4bc5647fdb9600ceb4943d4adff3749956a8512e5707716357b13d5ee687d9
-```
 
-For more details, please refer to [this](contracts/README.md) guide.
+Use `script/ZKMVerifierPlonk.s.sol:ZKMVerifierPlonkScript` for the PLONK verifier. For more details,
+see [the contracts guide](contracts/README.md).

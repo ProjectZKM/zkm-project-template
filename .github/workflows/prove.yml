@@ -22,15 +22,14 @@ jobs:
           submodules: recursive
 
       - name: Install rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
-          toolchain: 1.85.0
+          toolchain: nightly-2026-07-17
 
-      - name: Install zkMIPS toolchain
-        run: curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/zkMIPS/toolchain/refs/heads/main/setup.sh | sh
+      - name: Install Ziren toolchain
+        run: curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/ProjectZKM/toolchain/refs/heads/main/setup.sh | sh
       - name: Install Dependencies
         run: sudo apt install protobuf-compiler
-      - name: Execute zkMIPS program
+      - name: Execute the program
         run: |
-          source ~/.zkm-toolchain/env && cargo run --release -- --execute
+          source ~/.zkm-toolchain/env && cd host && cargo run --release -- --execute
