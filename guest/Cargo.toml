@@ -7,4 +7,4 @@ publish = false
 [dependencies]
 alloy-sol-types = { workspace = true }
 fibonacci-lib = { path = "../lib" }
-zkm-zkvm = { git = "https://github.com/ProjectZKM/Ziren", rev = "1f4573542fc8c40839a47eafeefffff5cec2dfbd", features = ["embedded"] }
+zkm-zkvm = { git = "https://github.com/ProjectZKM/Ziren", features = ["embedded"] }

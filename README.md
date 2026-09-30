@@ -4,9 +4,9 @@ The Project Template creates an end-to-end [Ziren](https://github.com/ProjectZKM
 a guest program proved by the Ziren zkVM, a host that executes it and generates proofs, and the
 on-chain Solidity verifier for the proofs.
 
-It targets Ziren V2.0: the Ziren crates are pinned to the V2.0 release commit in
-`host/Cargo.toml` and `guest/Cargo.toml`, and the verifier contracts are the `v2.0.0` ones in
-`contracts/src/v2.0.0`.
+It targets Ziren V2.0: the Ziren crates come from the `main` branch of
+[ProjectZKM/Ziren](https://github.com/ProjectZKM/Ziren), and the verifier contracts are the `v2.0.0`
+ones in `contracts/src/v2.0.0`.
 
 Two provers are available:
 
