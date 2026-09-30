@@ -1,4 +1,4 @@
-//! An end-to-end example of using the zkMIPS SDK to generate a proof of a program that can be executed
+//! An end-to-end example of using the Ziren SDK to generate a proof of a program that can be executed
 //! or have a core proof generated.
 //!
 //! You can run this script using the following command:
@@ -19,7 +19,7 @@ use clap::Parser;
 use fibonacci_lib::PublicValuesStruct;
 use zkm_sdk::{ProverClient, ZKMStdin, include_elf};
 
-/// The ELF (executable and linkable format) file for the zkMIPS zkVM.
+/// The ELF (executable and linkable format) file for the Ziren zkVM.
 pub const FIBONACCI_ELF: &[u8] = include_elf!("fibonacci");
 
 /// The arguments for the command.
@@ -47,8 +47,8 @@ fn main() {
     // Parse the command line arguments.
     let args = Args::parse();
 
-    if args.execute == args.core && args.compressed == args.execute {
-        eprintln!("Error: You must specify either --execute, --core, or --compress");
+    if [args.execute, args.core, args.compressed].iter().filter(|&&m| m).count() != 1 {
+        eprintln!("Error: You must specify exactly one of --execute, --core, or --compressed");
         std::process::exit(1);
     }
 
@@ -63,7 +63,7 @@ fn main() {
 
     if args.execute {
         // Execute the program
-        let (output, report) = client.execute(FIBONACCI_ELF, stdin).run().unwrap();
+        let (output, report) = client.execute(FIBONACCI_ELF, &stdin).run().unwrap();
         println!("Program executed successfully.");
 
         // Read the output.
@@ -79,7 +79,10 @@ fn main() {
         println!("Values are correct!");
 
         // Record the number of cycles executed.
-        println!("Number of cycles: {}", report.total_instruction_count());
+        println!(
+            "Number of cycles: {}",
+            report.total_instruction_count() + report.total_syscall_count()
+        );
     } else {
         // Setup the program for proving.
         let (pk, vk) = client.setup(FIBONACCI_ELF);

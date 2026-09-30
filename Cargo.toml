@@ -4,6 +4,8 @@ members = [
    "host",
    "lib"
 ]
+# The guest is built for MIPS by zkm-build (host/build.rs), not for the host target.
+default-members = ["host", "lib"]
 resolver = "2"
 
 [workspace.dependencies]

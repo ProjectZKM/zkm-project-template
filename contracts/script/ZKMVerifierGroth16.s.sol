@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {ZKMVerifier} from "../src/v1.0.0/ZKMVerifierGroth16.sol";
+import {ZKMVerifier} from "../src/v2.0.0/ZKMVerifierGroth16.sol";
 
 contract ZKMVerifierGroth16Script is Script {
     ZKMVerifier public verifier;

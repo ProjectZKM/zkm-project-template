@@ -4,8 +4,8 @@ pragma solidity ^0.8.20;
 import {Test, console} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Fibonacci} from "../src/Fibonacci.sol";
-import {ZKMVerifier as ZKMVerifierGroth16} from "../src/v1.0.0/ZKMVerifierGroth16.sol";
-import {ZKMVerifier as ZKMVerifierPlonk} from "../src/v1.0.0/ZKMVerifierPlonk.sol";
+import {ZKMVerifier as ZKMVerifierGroth16} from "../src/v2.0.0/ZKMVerifierGroth16.sol";
+import {ZKMVerifier as ZKMVerifierPlonk} from "../src/v2.0.0/ZKMVerifierPlonk.sol";
 
 struct ZKMProofFixtureJson {
     uint32 a;
@@ -50,6 +50,15 @@ contract FibonacciGroth16Test is Test {
         assert(b == fixture.b);
     }
 
+    function test_ValidFibonacciProof_Unmocked() public view {
+        ZKMProofFixtureJson memory fixture = loadFixture();
+
+        (uint32 n, uint32 a, uint32 b) = fibonacci.verifyFibonacciProof(fixture.publicValues, fixture.proof);
+        assert(n == fixture.n);
+        assert(a == fixture.a);
+        assert(b == fixture.b);
+    }
+
     function testRevert_InvalidFibonacciProof() public {
         vm.expectRevert();
 
@@ -87,6 +96,15 @@ contract FibonacciPlonkTest is Test {
         ZKMProofFixtureJson memory fixture = loadFixture();
 
         vm.mockCall(address(verifier), abi.encodeWithSelector(ZKMVerifierPlonk.verifyProof.selector), abi.encode(true));
+
+        (uint32 n, uint32 a, uint32 b) = fibonacci.verifyFibonacciProof(fixture.publicValues, fixture.proof);
+        assert(n == fixture.n);
+        assert(a == fixture.a);
+        assert(b == fixture.b);
+    }
+
+    function test_ValidFibonacciProof_Unmocked() public view {
+        ZKMProofFixtureJson memory fixture = loadFixture();
 
         (uint32 n, uint32 a, uint32 b) = fibonacci.verifyFibonacciProof(fixture.publicValues, fixture.proof);
         assert(n == fixture.n);

@@ -1,4 +1,4 @@
-//! An end-to-end example of using the zkMIPS SDK to generate a proof of a program that can have an
+//! An end-to-end example of using the Ziren SDK to generate a proof of a program that can have an
 //! EVM-Compatible proof generated which can be verified on-chain.
 //!
 //! You can run this script using the following command:
@@ -20,7 +20,7 @@ use zkm_sdk::{
     HashableKey, ProverClient, ZKMProofWithPublicValues, ZKMStdin, ZKMVerifyingKey, include_elf,
 };
 
-/// The ELF (executable and linkable format) file for the zkMIPS zkVM.
+/// The ELF (executable and linkable format) file for the Ziren zkVM.
 pub const FIBONACCI_ELF: &[u8] = include_elf!("fibonacci");
 
 /// The arguments for the EVM command.
@@ -40,7 +40,7 @@ enum ProofSystem {
     Groth16,
 }
 
-/// A fixture that can be used to test the verification of zkMIPS zkVM proofs inside Solidity.
+/// A fixture that can be used to test the verification of Ziren zkVM proofs inside Solidity.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct ZKMFibonacciProofFixture {
@@ -80,6 +80,9 @@ fn main() {
     }
     .expect("failed to generate proof");
 
+    // Verify the proof before writing it out as a fixture.
+    client.verify(&proof, &vk).expect("failed to verify proof");
+
     create_proof_fixture(&proof, &vk, args.system);
 }
 
@@ -100,7 +103,7 @@ fn create_proof_fixture(
         n,
         vkey: vk.bytes32().to_string(),
         public_values: format!("0x{}", hex::encode(bytes)),
-        proof: format!("0x{}", hex::encode(proof.bytes())),
+        proof: format!("0x{}", hex::encode(proof.bytes().expect("the proof has a byte encoding"))),
     };
 
     // The verification key is used to verify that the proof corresponds to the execution of the
@@ -116,7 +119,7 @@ fn create_proof_fixture(
     println!("Public Values: {}", fixture.public_values);
 
     // The proof proves to the verifier that the program was executed with some inputs that led to
-    // the give public values.
+    // the given public values.
     println!("Proof Bytes: {}", fixture.proof);
 
     // Save the fixture to a file.
