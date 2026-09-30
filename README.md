@@ -33,7 +33,7 @@ built with. The guest is always built with the Ziren toolchain.
 ## Requirements
 
 - Local proving: x86_64 Linux. Core and compressed proofs of this example need a few GB of memory;
-  Groth16 and PLONK proofs need about 80 GB, and Go 1.22 or later for the gnark prover.
+  Groth16 and PLONK proofs need about 80 GB, and Go 1.23 or later for the gnark prover (Ziren's `go.mod` declares `go 1.23.0`).
 - Network proving: x86_64 Linux, a registered address ([apply here](https://www.zkm.io/apply)) and
   the network's client certificates.
 
