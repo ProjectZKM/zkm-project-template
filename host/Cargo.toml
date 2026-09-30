@@ -1,6 +1,6 @@
 [package]
 name = "fibonacci-host"
-version = "1.0.0"
+version = "2.0.0"
 edition = "2024"
 default-run = "fibonacci-host"
 publish = false
@@ -21,7 +21,7 @@ hex = "0.4.3"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.200", default-features = false, features = ["derive"] }
 fibonacci-lib = { path = "../lib" }
-zkm-sdk = { git = "https://github.com/zkMIPS/zkMIPS.git" }
+zkm-sdk = { git = "https://github.com/ProjectZKM/Ziren", rev = "1f4573542fc8c40839a47eafeefffff5cec2dfbd" }
 
 [build-dependencies]
-zkm-build = { git = "https://github.com/zkMIPS/zkMIPS.git" }
+zkm-build = { git = "https://github.com/ProjectZKM/Ziren", rev = "1f4573542fc8c40839a47eafeefffff5cec2dfbd" }
